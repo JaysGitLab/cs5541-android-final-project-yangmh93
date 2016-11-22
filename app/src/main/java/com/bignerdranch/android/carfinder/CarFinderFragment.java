@@ -16,14 +16,18 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 
 /**
  * Created by Michael on 11/20/2016.
  */
-public class CarFinderFragment extends Fragment {
+public class CarFinderFragment extends SupportMapFragment {
     private static final String TAG = "CarFinderFragment";
     private GoogleApiClient mClient;
     private GoogleMap mMap;
+    private Location mCurrentLocation;
+    private Location mCarLocation;
 
     public static CarFinderFragment newInstance() {
         return new CarFinderFragment();
@@ -48,15 +52,15 @@ public class CarFinderFragment extends Fragment {
                     }
                 })
                 .build();
+
+        getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                mMap = googleMap;
+            }
+        });
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_car_finder, container, false);
-
-        return v;
-    }
 
     @Override
     public void onStart() {
