@@ -38,9 +38,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class CarFinderActivity extends AppCompatActivity
         implements
         GoogleMap.OnMyLocationButtonClickListener,
-        OnMapReadyCallback,
-        ActivityCompat.OnRequestPermissionsResultCallback,
-        NavigationView.OnNavigationItemSelectedListener {
+        OnMapReadyCallback{
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final String TAG = "TEST FRAGMENT";
@@ -50,7 +48,7 @@ public class CarFinderActivity extends AppCompatActivity
 
     private GoogleMap mMap;
     private GoogleApiClient mClient;
-    private Location mCurrentLocation;
+    private static final LatLng mCurrentLocation = new LatLng(33.751529,-84.323716);
 
     @Override
     protected void onResume() {
@@ -62,7 +60,7 @@ public class CarFinderActivity extends AppCompatActivity
                             new DialogInterface.OnCancelListener() {
                                 @Override
                                 public void onCancel(DialogInterface dialog) {
-// Leave if services are unavailable.
+                                    // Leave if services are unavailable.
                                     finish();
                                 }
                             });
@@ -75,7 +73,8 @@ public class CarFinderActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -84,6 +83,7 @@ public class CarFinderActivity extends AppCompatActivity
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                setCarLocation();
             }
         });
     }
@@ -94,6 +94,13 @@ public class CarFinderActivity extends AppCompatActivity
 
         mMap.setOnMyLocationButtonClickListener(this);
         enableMyLocation();
+    }
+
+    public void setCarLocation() {
+        MarkerOptions carMarker = new MarkerOptions()
+                .position(mCurrentLocation);
+        mMap.clear();
+        mMap.addMarker(carMarker);
     }
 
     private void enableMyLocation() {
@@ -182,28 +189,5 @@ public class CarFinderActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
 }
