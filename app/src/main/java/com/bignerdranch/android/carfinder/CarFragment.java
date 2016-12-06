@@ -1,0 +1,143 @@
+package com.bignerdranch.android.carfinder;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.text.format.DateFormat;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.Toast;
+
+import java.io.File;
+import java.util.Date;
+
+/**
+ * Created by Michael on 12/5/2016.
+ */
+public class CarFragment extends Fragment {
+
+    private static final String DIALOG_DATE = "DialogDate";
+    private static final String DIALOG_TIME = "DialogTime";
+    private static final String DIALOG_IMAGE = "DialogImage";
+
+    private static final int REQUEST_DATE = 0;
+    private static final int REQUEST_TIME = 1;
+    private static final int REQUEST_PHOTO = 2;
+
+    private Car mCar;
+    private File mPhotoFile;
+    private Spinner mSpinner;
+    private EditText mFloorField;
+    private Button mDateButton;
+    private Button mTimeButton;
+    private ImageButton mPhotoButton;
+    private ImageView mPhotoView;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mCar = new Car();
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_car, container, false);
+        mSpinner = (Spinner) v.findViewById(R.id.parking_spinner);
+        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mCar.setType(parent.getItemAtPosition(position).toString());
+                Toast.makeText(parent.getContext(), mCar.getType(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        mFloorField = (EditText)v.findViewById(R.id.floor);
+        mFloorField.setText(mCar.getFloor());
+        mFloorField.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                mCar.setFloor(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        mDateButton = (Button)v.findViewById(R.id.park_date);
+        updateDate();
+        mDateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager manager = getFragmentManager();
+                DatePickerFragment dialog = DatePickerFragment
+                        .newInstance(mCar.getDate());
+                dialog.setTargetFragment(CarFragment.this, REQUEST_DATE);
+                dialog.show(manager, DIALOG_DATE);
+            }
+        });
+        mTimeButton = (Button) v.findViewById(R.id.park_time);
+        updateTime();
+        mTimeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TimePickerFragment dialog = TimePickerFragment.newInstance(mCar.getDate());
+                FragmentManager manager = getFragmentManager();
+                dialog.setTargetFragment(CarFragment.this, REQUEST_TIME);
+                dialog.show(manager, DIALOG_TIME);
+            }
+        });
+
+        return v;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK) {
+            return;
+        }
+        Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
+        mCar.setDate(date);
+
+        switch (requestCode) {
+            case REQUEST_DATE:
+                updateDate();
+                break;
+            case REQUEST_TIME:
+                updateTime();
+                break;
+
+        }
+    }
+
+    private void updateDate() {
+        mDateButton.setText(DateFormat.format("EEEE, MMMM d, yyyyy", mCar.getDate()));
+    }
+
+    private void updateTime() {
+        mTimeButton.setText(DateFormat.format("h:mm a", mCar.getDate()));
+    }
+}

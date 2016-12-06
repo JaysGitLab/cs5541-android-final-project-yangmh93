@@ -3,6 +3,7 @@ package com.bignerdranch.android.carfinder;
 import android.Manifest;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -82,6 +83,8 @@ public class CarFinderActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 setCarLocation();
+                Intent intent = new Intent(getApplicationContext(), CarActivity.class);
+                startActivity(intent);
             }
         });
     }
