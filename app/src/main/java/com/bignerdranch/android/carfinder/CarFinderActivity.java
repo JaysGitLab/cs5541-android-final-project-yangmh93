@@ -143,7 +143,9 @@ public class CarFinderActivity extends AppCompatActivity
         mBounds = new LatLngBounds.Builder()
                 .include(mCarLocation)
                 .build();
-        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(mBounds, 50));
+        //int margin = getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
+
+       // mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mBounds, margin));
     }
 
     @Override
@@ -248,6 +250,9 @@ public class CarFinderActivity extends AppCompatActivity
                     mCar = (Car) data.getSerializableExtra("car");
                 }
         }
+        int margin = getResources().getDimensionPixelSize(R.dimen.map_inset_margin);
+
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(mBounds, margin));
     }
 
 
