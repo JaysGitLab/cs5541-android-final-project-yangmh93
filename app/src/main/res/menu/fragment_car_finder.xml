@@ -8,10 +8,4 @@
           android:title="@string/action_settings"
           android:orderInCategory="100"
           app:showAsAction="never"/>
-    <item android:id="@+id/action_park"
-          android:icon="@android:drawable/ic_menu_mylocation"
-          android:title="@string/park"
-          android:orderInCategory="100"
-          android:enabled="false"
-          app:showAsAction="ifRoom"/>
 </menu>

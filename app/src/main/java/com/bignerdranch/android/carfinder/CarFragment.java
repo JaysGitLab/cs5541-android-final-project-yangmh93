@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -49,12 +50,17 @@ public class CarFragment extends Fragment {
     private Button mTimeButton;
     private ImageButton mPhotoButton;
     private ImageView mPhotoView;
+    private Intent mIntent;
+    private Button mSaveButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mCar = new Car();
+        mIntent = getActivity().getIntent();
+        mCar = (Car) mIntent.getSerializableExtra("car");
+
         mPhotoFile = getPhotoFile(mCar);
+
     }
 
     @Override
@@ -82,6 +88,7 @@ public class CarFragment extends Fragment {
         updatePhotoView();
 
         mSpinner = (Spinner) v.findViewById(R.id.parking_spinner);
+        mSpinner.setSelection(((ArrayAdapter)mSpinner.getAdapter()).getPosition(mCar.getType()));
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -134,6 +141,16 @@ public class CarFragment extends Fragment {
                 FragmentManager manager = getFragmentManager();
                 dialog.setTargetFragment(CarFragment.this, REQUEST_TIME);
                 dialog.show(manager, DIALOG_TIME);
+            }
+        });
+        mSaveButton = (Button) v.findViewById(R.id.park_save);
+        mSaveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mIntent = new Intent(getActivity(), CarFinderActivity.class);
+                mIntent.putExtra("car", mCar);
+                getActivity().setResult(Activity.RESULT_OK, mIntent);
+                getActivity().finish();
             }
         });
 

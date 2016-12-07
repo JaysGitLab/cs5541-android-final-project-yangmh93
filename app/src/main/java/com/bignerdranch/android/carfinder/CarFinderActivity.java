@@ -1,6 +1,7 @@
 package com.bignerdranch.android.carfinder;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -41,6 +42,7 @@ public class CarFinderActivity extends AppCompatActivity
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final String TAG = "TEST FRAGMENT";
     private static final int REQUEST_ERROR = 0;
+    static final int TEMP = 1;
 
     private boolean mPermissionDenied = false;
 
@@ -48,11 +50,14 @@ public class CarFinderActivity extends AppCompatActivity
     private GoogleApiClient mClient;
     private Intent mIntent;
     private LatLngBounds mBounds;
+    private Car mCar;
     private static final LatLng mCarLocation = new LatLng(33.751529,-84.323716);
 
     @Override
     protected void onResume() {
         super.onResume();
+        Toast.makeText(this, "On Resume", Toast.LENGTH_SHORT).show();
+
     }
 
     @Override
@@ -72,12 +77,11 @@ public class CarFinderActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 setCarLocation();
-                if (mIntent != null) {
 
-                } else {
-                    mIntent = new Intent(getBaseContext(), CarActivity.class);
-                }
-                startActivity(mIntent);
+                mCar = new Car();
+                mIntent = new Intent(getApplicationContext(), CarActivity.class);
+                mIntent.putExtra("car", mCar);
+                startActivityForResult(mIntent, TEMP);
             }
         });
     }
@@ -108,7 +112,9 @@ public class CarFinderActivity extends AppCompatActivity
     public void onInfoWindowClick(Marker marker) {
         Toast.makeText(this, "Click Info Window", Toast.LENGTH_SHORT).show();
 
-        startActivity(mIntent);
+        mIntent = new Intent(getApplicationContext(), CarActivity.class);
+        mIntent.putExtra("car", mCar);
+        startActivityForResult(mIntent, TEMP);
     }
 
     private void enableMyLocation() {
@@ -193,6 +199,17 @@ public class CarFinderActivity extends AppCompatActivity
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode) {
+            case (TEMP):
+                if (resultCode == Activity.RESULT_OK) {
+                    mCar = (Car) data.getSerializableExtra("car");
+                }
+        }
     }
 
 

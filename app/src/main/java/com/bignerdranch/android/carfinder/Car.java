@@ -1,11 +1,14 @@
 package com.bignerdranch.android.carfinder;
 
 import java.util.Date;
+import java.io.Serializable;
 
 /**
  * Created by Michael on 11/20/2016.
  */
-public class Car {
+@SuppressWarnings("serial")
+public class Car implements Serializable {
+
     private String mType;
     private String mFloor;
     private Date mDate;
