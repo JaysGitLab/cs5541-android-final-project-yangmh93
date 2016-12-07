@@ -35,7 +35,6 @@ public class CarFragment extends Fragment {
 
     private static final String DIALOG_DATE = "DialogDate";
     private static final String DIALOG_TIME = "DialogTime";
-    private static final String DIALOG_IMAGE = "DialogImage";
 
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_TIME = 1;
@@ -44,14 +43,10 @@ public class CarFragment extends Fragment {
 
     private Car mCar;
     private File mPhotoFile;
-    private Spinner mSpinner;
-    private EditText mFloorField;
     private Button mDateButton;
     private Button mTimeButton;
-    private ImageButton mPhotoButton;
     private ImageView mPhotoView;
     private Intent mIntent;
-    private Button mSaveButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -69,7 +64,7 @@ public class CarFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_car, container, false);
         PackageManager packageManager = getActivity().getPackageManager();
 
-        mPhotoButton = (ImageButton) v.findViewById(R.id.parking_camera);
+        ImageButton mPhotoButton = (ImageButton) v.findViewById(R.id.parking_camera);
         final Intent captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         boolean canTakePhoto = mPhotoFile != null &&
                 captureImage.resolveActivity(packageManager) != null;
@@ -87,7 +82,7 @@ public class CarFragment extends Fragment {
         mPhotoView = (ImageView) v.findViewById(R.id.parking_photo);
         updatePhotoView();
 
-        mSpinner = (Spinner) v.findViewById(R.id.parking_spinner);
+        Spinner mSpinner = (Spinner) v.findViewById(R.id.parking_spinner);
         mSpinner.setSelection(((ArrayAdapter)mSpinner.getAdapter()).getPosition(mCar.getType()));
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -101,7 +96,7 @@ public class CarFragment extends Fragment {
 
             }
         });
-        mFloorField = (EditText)v.findViewById(R.id.floor);
+        EditText mFloorField = (EditText)v.findViewById(R.id.floor);
         mFloorField.setText(mCar.getFloor());
         mFloorField.addTextChangedListener(new TextWatcher() {
             @Override
@@ -143,7 +138,7 @@ public class CarFragment extends Fragment {
                 dialog.show(manager, DIALOG_TIME);
             }
         });
-        mSaveButton = (Button) v.findViewById(R.id.park_save);
+        Button mSaveButton = (Button) v.findViewById(R.id.park_save);
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

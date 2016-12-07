@@ -1,7 +1,5 @@
 package com.bignerdranch.android.carfinder;
 
-import android.location.Location;
-
 import java.util.Date;
 import java.io.Serializable;
 
