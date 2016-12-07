@@ -6,10 +6,12 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -22,6 +24,9 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -51,23 +56,24 @@ public class CarFinderActivity extends AppCompatActivity
     private Intent mIntent;
     private LatLngBounds mBounds;
     private Car mCar;
-    private static final LatLng mCarLocation = new LatLng(33.751529,-84.323716);
+    private LatLng mCarLocation;
 
     @Override
     protected void onResume() {
         super.onResume();
         Toast.makeText(this, "On Resume", Toast.LENGTH_SHORT).show();
-
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mClient = new GoogleApiClient.Builder(getApplicationContext())
+                .addApi(LocationServices.API)
+                .build();
         if (savedInstanceState != null){
             mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mBounds, 150));
         }
-
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -76,14 +82,26 @@ public class CarFinderActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setCarLocation();
 
                 mCar = new Car();
+                findLocation();
+
                 mIntent = new Intent(getApplicationContext(), CarActivity.class);
                 mIntent.putExtra("car", mCar);
                 startActivityForResult(mIntent, TEMP);
             }
         });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mClient.connect();
+    }
+    @Override
+    public void onStop() {
+        super.onStop();
+        mClient.disconnect();
     }
 
     @Override
@@ -95,7 +113,27 @@ public class CarFinderActivity extends AppCompatActivity
         enableMyLocation();
     }
 
-    public void setCarLocation() {
+    public void findLocation() {
+        LocationRequest request = LocationRequest.create();
+        request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        request.setNumUpdates(1);
+        request.setInterval(0);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi
+                    .requestLocationUpdates(mClient, request, new LocationListener() {
+                        @Override
+                        public void onLocationChanged(Location location) {
+                            Log.i(TAG, "Got a fix: " + location);
+                            setCarLocation(location);
+                        }
+                    });
+        }
+
+    }
+
+    public void setCarLocation(Location location) {
+        mCarLocation = new LatLng(location.getLatitude(), location.getLongitude());
         MarkerOptions carMarker = new MarkerOptions()
                 .position(mCarLocation)
                 .title("Your Car Location")
@@ -105,7 +143,7 @@ public class CarFinderActivity extends AppCompatActivity
         mBounds = new LatLngBounds.Builder()
                 .include(mCarLocation)
                 .build();
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mBounds, 50));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(mBounds, 50));
     }
 
     @Override

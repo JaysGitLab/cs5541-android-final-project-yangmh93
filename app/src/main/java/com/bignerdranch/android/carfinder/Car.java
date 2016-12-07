@@ -1,5 +1,7 @@
 package com.bignerdranch.android.carfinder;
 
+import android.location.Location;
+
 import java.util.Date;
 import java.io.Serializable;
 
@@ -12,8 +14,6 @@ public class Car implements Serializable {
     private String mType;
     private String mFloor;
     private Date mDate;
-    private double mLat;
-    private double mLon;
 
     public Car() {
         mDate = new Date();
@@ -40,22 +40,6 @@ public class Car implements Serializable {
 
     public void setDate(Date date) {
         mDate = date;
-    }
-
-    public double getLat() {
-        return mLat;
-    }
-
-    public void setLat(double lat) {
-        mLat = lat;
-    }
-
-    public double getLon() {
-        return mLon;
-    }
-
-    public void setLon(double lon) {
-        mLon = lon;
     }
 
     public String getPhotoFilename() {
