@@ -88,7 +88,6 @@ public class CarFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 mCar.setType(parent.getItemAtPosition(position).toString());
-                Toast.makeText(parent.getContext(), mCar.getType(), Toast.LENGTH_SHORT).show();
             }
 
             @Override
