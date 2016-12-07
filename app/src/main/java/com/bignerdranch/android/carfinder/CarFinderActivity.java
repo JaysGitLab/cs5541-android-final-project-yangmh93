@@ -5,21 +5,14 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.View;
-import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -28,18 +21,22 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
+import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 
 public class CarFinderActivity extends AppCompatActivity
         implements
-        GoogleMap.OnMyLocationButtonClickListener,
-        OnMapReadyCallback{
+        OnMyLocationButtonClickListener,
+        OnMapReadyCallback,
+        OnInfoWindowClickListener {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final String TAG = "TEST FRAGMENT";
@@ -49,30 +46,22 @@ public class CarFinderActivity extends AppCompatActivity
 
     private GoogleMap mMap;
     private GoogleApiClient mClient;
-    private static final LatLng mCurrentLocation = new LatLng(33.751529,-84.323716);
+    private Intent mIntent;
+    private LatLngBounds mBounds;
+    private static final LatLng mCarLocation = new LatLng(33.751529,-84.323716);
 
     @Override
     protected void onResume() {
         super.onResume();
-        int errorCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if (errorCode != ConnectionResult.SUCCESS) {
-            Dialog errorDialog = GooglePlayServicesUtil
-                    .getErrorDialog(errorCode, this, REQUEST_ERROR,
-                            new DialogInterface.OnCancelListener() {
-                                @Override
-                                public void onCancel(DialogInterface dialog) {
-                                    // Leave if services are unavailable.
-                                    finish();
-                                }
-                            });
-            errorDialog.show();
-        }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (savedInstanceState != null){
+            mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mBounds, 150));
+        }
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -83,8 +72,12 @@ public class CarFinderActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 setCarLocation();
-                Intent intent = new Intent(getApplicationContext(), CarActivity.class);
-                startActivity(intent);
+                if (mIntent != null) {
+
+                } else {
+                    mIntent = new Intent(getBaseContext(), CarActivity.class);
+                }
+                startActivity(mIntent);
             }
         });
     }
@@ -94,14 +87,28 @@ public class CarFinderActivity extends AppCompatActivity
         mMap = map;
 
         mMap.setOnMyLocationButtonClickListener(this);
+        mMap.setOnInfoWindowClickListener(this);
         enableMyLocation();
     }
 
     public void setCarLocation() {
         MarkerOptions carMarker = new MarkerOptions()
-                .position(mCurrentLocation);
+                .position(mCarLocation)
+                .title("Your Car Location")
+                .snippet("Tap for details");
         mMap.clear();
         mMap.addMarker(carMarker);
+        mBounds = new LatLngBounds.Builder()
+                .include(mCarLocation)
+                .build();
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mBounds, 50));
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        Toast.makeText(this, "Click Info Window", Toast.LENGTH_SHORT).show();
+
+        startActivity(mIntent);
     }
 
     private void enableMyLocation() {
@@ -123,8 +130,6 @@ public class CarFinderActivity extends AppCompatActivity
         // (the camera animates to the user's current position).
         return false;
     }
-
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,

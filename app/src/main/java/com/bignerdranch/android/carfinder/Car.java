@@ -54,4 +54,8 @@ public class Car {
     public void setLon(double lon) {
         mLon = lon;
     }
+
+    public String getPhotoFilename() {
+        return "IMG_" + getDate().toString() + ".jpg";
+    }
 }

@@ -2,7 +2,12 @@ package com.bignerdranch.android.carfinder;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.text.Editable;
@@ -35,6 +40,7 @@ public class CarFragment extends Fragment {
     private static final int REQUEST_TIME = 1;
     private static final int REQUEST_PHOTO = 2;
 
+
     private Car mCar;
     private File mPhotoFile;
     private Spinner mSpinner;
@@ -47,14 +53,34 @@ public class CarFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mCar = new Car();
+        mPhotoFile = getPhotoFile(mCar);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_car, container, false);
+        PackageManager packageManager = getActivity().getPackageManager();
+
+        mPhotoButton = (ImageButton) v.findViewById(R.id.parking_camera);
+        final Intent captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        boolean canTakePhoto = mPhotoFile != null &&
+                captureImage.resolveActivity(packageManager) != null;
+        mPhotoButton.setEnabled(canTakePhoto);
+        if (canTakePhoto) {
+            Uri uri = Uri.fromFile(mPhotoFile);
+            captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        }
+        mPhotoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivityForResult(captureImage, REQUEST_PHOTO);
+            }
+        });
+        mPhotoView = (ImageView) v.findViewById(R.id.parking_photo);
+        updatePhotoView();
+
         mSpinner = (Spinner) v.findViewById(R.id.parking_spinner);
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -129,6 +155,9 @@ public class CarFragment extends Fragment {
             case REQUEST_TIME:
                 updateTime();
                 break;
+            case REQUEST_PHOTO:
+                updatePhotoView();
+                break;
 
         }
     }
@@ -139,5 +168,23 @@ public class CarFragment extends Fragment {
 
     private void updateTime() {
         mTimeButton.setText(DateFormat.format("h:mm a", mCar.getDate()));
+    }
+
+    private void updatePhotoView() {
+        if (mPhotoFile == null || !mPhotoFile.exists()) {
+            mPhotoView.setImageDrawable(null);
+        } else {
+            Bitmap bitmap = PictureUtils.getScaledBitmap(
+                    mPhotoFile.getPath(), getActivity());
+            mPhotoView.setImageBitmap(bitmap);
+        }
+    }
+    public File getPhotoFile(Car car) {
+        File externalFilesDir = getContext()
+                .getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        if (externalFilesDir == null) {
+            return null;
+        }
+        return new File(externalFilesDir, car.getPhotoFilename());
     }
 }
